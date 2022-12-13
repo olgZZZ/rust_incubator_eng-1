@@ -15,9 +15,9 @@ Value-to-value conversion in [Rust] is done with [`From`] and [`Into`] mirrored 
 If your conversion may fail, then you should use [`TryFrom`]/[`TryInto`] analogues, which __allow failing in a controlled way__.
 
 ```rust
-let num: u32 = 5;
-let big_num: u64 = num.into();
-let small_num: u16 = big_num.try_into().expect("Value is too big");
+let num : u32 = 5;
+let big_num : u64 = num.into();
+let small_num : u16 = big_num.try_into().expect( "Value is too big" );
 ```
 
 Note, that __all these traits consume ownership__ of a passed value. However, they [can be implemented for references too][2] if you're treating a reference as a value.
@@ -37,8 +37,8 @@ For better understanding [`From`]/[`Into`] and [`TryFrom`]/[`TryInto`] purpose, 
 Quite often you don't want to consume ownership of a value for conversion, but rather to refer it as another type. In such case [`AsRef`]/[`AsMut`] should be used. They allow to do a __cheap non-fallible reference-to-reference conversion__.
 
 ```rust
-let string: String = "some text".into();
-let bytes: &[u8] = string.as_ref();
+let string : String = "some text".into();
+let bytes : &[ u8 ] = string.as_ref();
 ```
 
 [`AsRef`]/[`AsMut`] are commonly implemented for smart pointers to allow referring a data behind it via regular [Rust] references.
@@ -65,17 +65,21 @@ For example, it's natural for an `UserEmail` type to implement `AsRef<str>`, so 
 [`AsRef`]/[`AsMut`] are able to do only outer-to-inner reference conversion, but obviously not the opposite.
 
 ```rust
-struct Id(u8);
+struct Id( u8 );
 
-impl AsRef<u8> for Id {
-    fn as_ref(&self) -> &u8 {
+impl AsRef< u8 > for Id
+{
+    fn as_ref( &self ) -> &u8
+    {
         &self.0
     }
 }
 
-impl AsRef<Id> for u8 {
-    fn as_ref(&self) -> &Id {
-        &Id(*self)
+impl AsRef< Id > for u8
+{
+    fn as_ref( &self ) -> &Id
+    {
+        &Id( *self )
     }
 }
 ```
@@ -83,7 +87,7 @@ impl AsRef<Id> for u8 {
 error[E0515]: cannot return reference to temporary value
   --> src/lib.rs:11:9
    |
-11 |         &Id(*self)
+11 |         &Id( *self )
    |         ^---------
    |         ||
    |         |temporary value created here
@@ -93,12 +97,14 @@ error[E0515]: cannot return reference to temporary value
 However, there is nothing wrong with such conversion as long as memory layout of the inner type is the same for the outer type.
 
 ```rust
-#[repr(transparent)]
-struct Id(u8);
+#[ repr( transparent ) ]
+struct Id( u8 );
 
-impl AsRef<Id> for u8 {
-    fn as_ref(&self) -> &Id {
-        unsafe { mem::transmute(self) }
+impl AsRef< Id > for u8
+{
+    fn as_ref( &self ) -> &Id
+    {
+        unsafe { mem::transmute( self ) }
     }
 }
 ```
@@ -113,12 +119,13 @@ That's exactly what [`ref-cast`] crate checks and does, without necessity of wri
 [`Deref`]/[`DerefMut`] standard library trait __allows to implicitly coerce from a custom type to a reference__ when dereferencing (operator `*v`) is used. The most common example of this is using [`Box<T>`][`Box`] where `&T` is expected.
 
 ```rust
-fn hello(name: &str) {
-    println!("Hello, {}!", name);
+fn hello( name : &str ) 
+{
+    println!( "Hello, {}!", name );
 }
 
-let m = Box::new(String::from("Rust"));
-hello(&m);
+let m = Box::new( String::from( "Rust" ) );
+hello( &m );
 ```
 
 For better understanding [`Deref`] purpose, design, limitations and use cases read through:
@@ -144,9 +151,10 @@ The wider explanation of this bad practice is given in [this SO answer][5] and [
 For casting between types the [`as` keyword][`as`] is used in [Rust].
 
 ```rust
-fn average(values: &[f64]) -> f64 {
-    let sum: f64 = sum(values);
-    let size: f64 = len(values) as f64;
+fn average( values: &[ f64 ] ) -> f64
+{
+    let sum : f64 = sum( values );
+    let size : f64 = len( values ) as f64;
     sum / size
 }
 ```
@@ -164,7 +172,7 @@ See also:
 
 Implement the following types:
 1. `EmailString` - a type, which value can be only a valid email address string.
-2. `Random<T>` - a smart pointer, which takes 3 values of the pointed-to type on creation and points to one of them randomly every time is used.
+2. `Random< T >` - a smart pointer, which takes 3 values of the pointed-to type on creation and points to one of them randomly every time is used.
 
 Provide conversion and `Deref` implementations for these types on your choice, to make their usage and interoperability with `std` types easy and ergonomic.
 
