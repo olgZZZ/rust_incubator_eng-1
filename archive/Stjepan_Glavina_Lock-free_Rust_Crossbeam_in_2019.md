@@ -26,20 +26,20 @@ of useful resources buried in here! 💎
 
 ## Contents
 
-* [What is Crossbeam?](#what-is-crossbeam)
-* [2015: Early days](#2015-early-days)
-* [2017: New beginnings](#2017-new-beginnings)
-* [Epochs: Rewritten from scratch](#epochs-rewritten-from-scratch)
-* [Channels: Improving on mpsc and Go](#channels-improving-on-mpsc-and-go)
-* [Scoped threads: Makeover](#scoped-threads-makeover)
-* [AtomicCell: Like Cell, but atomic!](#atomiccell-like-cell-but-atomic)
-* [Synchronization: New primitives](#synchronization-new-primitives)
-* [Deque: Juggling tasks in schedulers](#deque-juggling-tasks-in-schedulers)
-* [Queues: Revamped](#queues-revamped)
-* [Skiplist: Just around the corner](#skiplist-just-around-the-corner)
-* [Utilities: Simple and handy](#utilities-simple-and-handy)
-* [Where to next?](#where-to-next)
-* [Thanks](#thanks)
+- [What is Crossbeam?](#what-is-crossbeam)
+- [2015: Early days](#2015-early-days)
+- [2017: New beginnings](#2017-new-beginnings)
+- [Epochs: Rewritten from scratch](#epochs-rewritten-from-scratch)
+- [Channels: Improving on mpsc and Go](#channels-improving-on-mpsc-and-go)
+- [Scoped threads: Makeover](#scoped-threads-makeover)
+- [AtomicCell: Like Cell, but atomic!](#atomiccell-like-cell-but-atomic)
+- [Synchronization: New primitives](#synchronization-new-primitives)
+- [Deque: Juggling tasks in schedulers](#deque-juggling-tasks-in-schedulers)
+- [Queues: Revamped](#queues-revamped)
+- [Skiplist: Just around the corner](#skiplist-just-around-the-corner)
+- [Utilities: Simple and handy](#utilities-simple-and-handy)
+- [Where to next?](#where-to-next)
+- [Thanks](#thanks)
 
 # What is Crossbeam?
 
@@ -570,11 +570,13 @@ OS scheduler. Here's how one might use it to wait for an `AtomicBool`
 to become `true`:
 
 ```rust
-fn spin_wait(ready: &AtomicBool) {
-    let backoff = Backoff::new();
-    while !ready.load(SeqCst) {
-        backoff.snooze();
-    }
+fn spin_wait( ready : &AtomicBool ) 
+{
+  let backoff = Backoff::new();
+  while !ready.load( SeqCst ) 
+  {
+    backoff.snooze();
+  }
 }
 ```
 
@@ -585,10 +587,11 @@ queue, it's a good idea to put the head and tail indices into their
 own cache lines:
 
 ```rust
-struct Queue<T> {
-    head: CachePadded<AtomicUsize>,
-    tail: CachePadded<AtomicUsize>,
-    buffer: Buffer<T>,
+struct Queue< T > 
+{
+  head : CachePadded< AtomicUsize >,
+  tail : CachePadded< AtomicUsize >,
+  buffer : Buffer< T >,
 }
 ```
 

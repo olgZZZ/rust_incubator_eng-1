@@ -24,34 +24,39 @@ __Estimated time__: 1 day
 
 While [Rust] ecosystem has [some BDD testing style crates][11] (the most mature one is [`cucumber`] crate), it's not a requirement to use them to follow the [BDD] style (as they may be too complex for some trivial cases, like [unit testing][12]). There is nothing preventing you from following [BDD] style in usual [Rust] tests. So, instead of:
 ```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[ cfg( test ) ]
+mod tests 
+{
+  use super::*;
     
-    #[test]
-    fn test_hash() {
-        let h = hash("some_string");
+  #[ test ]
+  fn test_hash() 
+  {
+    let h = hash( "some_string" );
         
-        assert_eq!(h.len(), 64);
-        assert!(!h.contains("z"));
-    }
+    assert_eq!(h.len(), 64);
+    assert!(!h.contains("z"));
+  }
 }
 ```
 You're always free to write it more meaningfully:
 ```rust
-#[cfg(test)]
-mod hash_spec {
-    use super::*;
+#[ cfg( test ) ]
+mod hash_spec 
+{
+  use super::*;
     
-    #[test]
-    fn has_64_symbols_len() {
-        assert_eq!(hash("some_string").len(), 64);
-    }
+  #[ test ]
+  fn has_64_symbols_len() 
+  {
+    assert_eq!(hash("some_string").len(), 64);
+  }
     
-    #[test]
-    fn contains_hex_chars_only() {
-        assert!(!hash("some_string").contains("z"));
-    }
+  #[ test ]
+  fn contains_hex_chars_only() 
+  {
+    assert!(!hash("some_string").contains("z"));
+  }
 }
 ```
 This makes tests more granular (and so, more meaningful test failures) and testing intentions become more understandable for readers.

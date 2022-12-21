@@ -26,13 +26,15 @@ channels and goroutines!
 To illustrate what its channels can do, consider the following function:
 
 ```go
-func Match(name string, c chan string) {
-    select {
-    case peer := <-c:
-        fmt.Printf("%s received a message from %s.\n", name, peer)
-    case c <- name:
-        // Wait for someone to receive my message.
-    }
+func Match( name string, c chan string ) 
+{
+  select 
+  {
+    case peer : = <-c :
+      fmt.Printf( "%s received a message from %s.\n", name, peer )
+    case c <- name :
+      // Wait for someone to receive my message.
+  }
 }
 ```
 
@@ -86,9 +88,10 @@ But that is not always good enough. For example, in [hyper](https://github.com/h
 (a HTTP library) the following is a common idiom:
 
 ```rust
-let (tx, rx) = channel();
-Server::http(addr).listen(move |req, res| {
-    tx.send("request!"); // tx does not implement Sync
+let ( tx, rx ) = channel();
+Server::http( addr ).listen( move | req, res | 
+{
+  tx.send( "request!" ); // tx does not implement Sync
 });
 ```
 
@@ -96,10 +99,11 @@ This doesn't compile because `tx` cannot be shared among multiple threads. The o
 but also a slow and unpleasant solution would be:
 
 ```rust
-let (tx, rx) = channel();
-let tx = Mutex::new(tx);
-Server::http(addr).listen(move |req, res| {
-    tx.lock().unwrap().send("request!"); 
+let ( tx, rx ) = channel();
+let tx = Mutex::new( tx );
+Server::http( addr ).listen( move | req, res | 
+{
+  tx.lock().unwrap().send( "request!" ); 
 });
 ```
 
@@ -156,8 +160,8 @@ To summarize: unbounded channels are fast, and bounded channels are slow.
 Channels can be constructed using the following two functions:
 
 ```rust
-fn channel<T>(cap: usize) -> (Sender<T>, Receiver<T>);
-fn sync_channel<T>(cap: usize) -> (SyncSender<T>, Receiver<T>);
+fn channel< T >( cap : usize ) -> ( Sender< T >, Receiver< T > );
+fn sync_channel< T >( cap: usize ) -> ( SyncSender< T >, Receiver< T > );
 ```
 
 It's a bit peculiar how the return types share `Receiver`, but at the same time,
@@ -201,22 +205,27 @@ The main problem with `Select` is that it's not pretty to use - just look at thi
 *simplified* snippet from Servo:
 
 ```rust
-let mut event = {
-    let sel = Select::new();
-    let mut script_port = sel.handle(&self.port);
-    let mut control_port = sel.handle(&self.control_port);
-    unsafe {
-        script_port.add();
-        control_port.add();
+let mut event = 
+{
+  let sel = Select::new();
+  let mut script_port = sel.handle( &self.port );
+  let mut control_port = sel.handle( &self.control_port );
+    unsafe 
+    {
+      script_port.add();
+      control_port.add();
     }
     let ret = sel.wait();
-    if ret == script_port.id() {
-        FromScript(self.port.recv().unwrap())
-    } else if ret == control_port.id() {
-        FromConstellation(self.control_port.recv().unwrap())
-    } else {
-        panic!("unexpected select result")
-    }
+    if ret == script_port.id() 
+    {
+      FromScript( self.port.recv().unwrap() )
+    } else if ret == control_port.id() 
+      {
+        FromConstellation( self.control_port.recv().unwrap() )
+      } else 
+        {
+          panic!("unexpected select result")
+        }
 };
 ```
 
@@ -254,8 +263,8 @@ First of all, I don't like the *synchronous/asynchronous* terminology, and would
 Let's start with channel construction, which might look like this:
 
 ```rust
-fn unbounded<T>() -> (Sender<T>, Receiver<T>);
-fn bounded<T>(cap: usize) -> (Sender<T>, Receiver<T>);
+fn unbounded< T >() -> ( Sender< T >, Receiver< T > );
+fn bounded< T >( cap : usize ) -> ( Sender< T >, Receiver< T > );
 ```
 
 So far so good.
@@ -263,29 +272,31 @@ So far so good.
 Next up is the interface for `Sender` and `Receiver`:
 
 ```rust
-struct Sender<T> { ... }
-struct Receiver<T> { ... }
+struct Sender< T > { ... }
+struct Receiver< T > { ... }
 
-impl<T> Sender<T> {
-    fn try_send(&self, value: T) -> Result<(), TrySendError<T>>;
-    fn send(&self, value: T) -> Result<(), SendError<T>>;
-    fn send_timeout(&self, value: T, dur: Duration) -> Result<(), SendTimeoutError<T>>;
+impl< T > Sender< T > 
+{
+  fn try_send( &self, value : T ) -> Result< (), TrySendError< T > >;
+    fn send( &self, value : T ) -> Result< (), SendError< T > >;
+    fn send_timeout( &self, value : T, dur : Duration ) -> Result< (), SendTimeoutError< T > >;
 }
 
-impl<T> Receiver<T> {
-    fn try_recv(&self) -> Result<T, TryRecvError>;
-    fn recv(&self) -> Result<T, RecvError>;
-    fn recv_timeout(&self, dur: Duration) -> Result<T, RecvTimeoutError>;
+impl< T > Receiver< T > 
+{
+  fn try_recv( &self ) -> Result< T, TryRecvError >;
+  fn recv( &self ) -> Result< T, RecvError >;
+  fn recv_timeout( &self, dur : Duration ) -> Result< T, RecvTimeoutError >;
 }
 
-impl<T> Clone for Sender<T> { ... }
-impl<T> Clone for Receiver<T> { ... }
+impl< T > Clone for Sender< T > { ... }
+impl< T > Clone for Receiver< T > { ... }
 
-unsafe impl<T: Send> Send for Sender<T> {}
-unsafe impl<T: Send> Sync for Sender<T> {}
+unsafe impl< T: Send > Send for Sender< T > {}
+unsafe impl< T: Send > Sync for Sender< T > {}
 
-unsafe impl<T: Send> Send for Receiver<T> {}
-unsafe impl<T: Send> Sync for Receiver<T> {}
+unsafe impl< T: Send > Send for Receiver< T > {}
+unsafe impl< T: Send > Sync for Receiver< T > {}
 ```
 
 Note how symmetrical and simple `Sender` and `Receiver` are: both have a triple of
@@ -319,12 +330,14 @@ look like, let alone how would one go about implementing it. And in the end this
 came up with:
 
 ```rust
-impl<T> Sender<T> {
-    fn select(&self, value: T) -> Result<(), T>;
+impl< T > Sender< T > 
+{
+  fn select( &self, value : T ) -> Result< (), T >;
 }
 
-impl<T> Receiver<T> {
-    fn select(&self) -> Result<T, ()>;
+impl< T > Receiver< T > 
+{
+  fn select( &self ) -> Result< T, () >;
 }
 ```
 
@@ -335,20 +348,25 @@ To show what exactly these methods do, let's jump straight to reimplementing the
 from the introductory Go example.
 
 ```rust
-fn match(mut name: String, tx: &Sender<String>, rx: &Receiver<String>) {
-    loop {
-        if let Ok(peer) = rx.select() {
-            println!("{} received a message from {}.", name, peer);
-            break;
-        }
-
-        if let Err(s) = tx.select(name) {
-            name = s;
-        } else {
-            // Wait for someone to receive my message.
-            break;
-        }
+fn match( mut name : String, tx : &Sender< String >, rx : &Receiver< String > ) 
+{
+  loop 
+  {
+    if let Ok( peer ) = rx.select() 
+    {
+      println!( "{} received a message from {}.", name, peer );
+      break;
     }
+
+    if let Err( s ) = tx.select( name ) 
+    {
+      name = s;
+    } else 
+      {
+        // Wait for someone to receive my message.
+        break;
+      }
+  }
 }
 ```
 
@@ -398,18 +416,21 @@ this selection mechanism would give us is totally worth it.
 Finally, for additional convenience we could even support a few special selection cases, for example:
 
 ```rust
-loop {
-    // ...
+loop 
+{
+  // ...
 
-    if select::timeout(Duration::from_ms(100)) {
-        // Fires after 100 milliseconds.
-        break;
-    }
+  if select::timeout( Duration::from_ms( 100 ) ) 
+  {
+    // Fires after 100 milliseconds.
+    break;
+  }
 
-    if select::disconnected() {
-        // Fires if all selected channels are disconnected.
-        break;
-    }
+  if select::disconnected() 
+  {
+    // Fires if all selected channels are disconnected.
+    break;
+  }
 }
 ```
 

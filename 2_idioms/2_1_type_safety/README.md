@@ -14,51 +14,57 @@ __Estimated time__: 1 day
 
 Consider the following example, which demonstrates a possible bug:
 ```rust
-#[derive(Clone)]
-struct Post {
-    id: u64,
-    user_id: u64,
-    title: String,
-    body: String,
+#[ derive( Clone ) ]
+struct Post 
+{
+  id: u64,
+  user_id: u64,
+  title: String,
+  body: String,
 }
 
-fn repost(post: &Post, new_author_id: u64) -> Post {
-    let mut new_post = post.clone();
-    new_post.id = new_author_id;  // Oops!
-    new_post
+fn repost(post: &Post, new_author_id: u64) -> Post 
+{
+  let mut new_post = post.clone();
+  new_post.id = new_author_id;  // Oops!
+  new_post
 }
 ```
 Here the problem occurs because our entities are expressed in values, so compiler makes no difference between `Post::id` and `Post::user_id` as they have the same type.
 
 Let's express those entities in types:
 ```rust
-mod post {
-    #[derive(Clone, Debug, PartialEq)]
-    pub struct Id(u64);
+mod post 
+{
+  #[derive( Clone, Debug, PartialEq ) ]
+  pub struct Id( u64 );
 
-    #[derive(Clone, Debug, PartialEq)]
-    pub struct Title(String);
+  #[derive( Clone, Debug, PartialEq ) ]
+  pub struct Title( String );
 
-    #[derive(Clone, Debug, PartialEq)]
-    pub struct Body(String);
+  #[derive( Clone, Debug, PartialEq ) ]
+  pub struct Body( String );
 }
-mod user {
-    #[derive(Clone, Debug, PartialEq)]
-    pub struct Id(u64);
-}
-
-#[derive(Clone)]
-struct Post {
-    id: post::Id,
-    user_id: user::Id,
-    title: post::Title,
-    body: post::Body,
+mod user 
+{
+  #[ derive( Clone, Debug, PartialEq ) ]
+  pub struct Id( u64 );
 }
 
-fn repost(post: &Post, new_author_id: user::Id) -> Post {
-    let mut new_post = post.clone();
-    new_post.id = new_author_id;  // Does not compile!
-    new_post
+#[ derive( Clone ) ]
+struct Post 
+{
+  id : post::Id,
+  user_id : user::Id,
+  title : post::Title,
+  body : post::Body,
+}
+
+fn repost( post : &Post, new_author_id : user::Id ) -> Post 
+{
+  let mut new_post = post.clone();
+  new_post.id = new_author_id;  // Does not compile!
+  new_post
 }
 ```
 Now, compiler is able to cut off this type of bugs _totally_ at compile time, and to be quite informative with errors:

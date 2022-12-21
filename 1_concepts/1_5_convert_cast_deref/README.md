@@ -69,18 +69,18 @@ struct Id( u8 );
 
 impl AsRef< u8 > for Id
 {
-    fn as_ref( &self ) -> &u8
-    {
-        &self.0
-    }
+  fn as_ref( &self ) -> &u8
+  {
+    &self.0
+  }
 }
 
 impl AsRef< Id > for u8
 {
-    fn as_ref( &self ) -> &Id
-    {
-        &Id( *self )
-    }
+  fn as_ref( &self ) -> &Id
+  {
+    &Id( *self )
+  }
 }
 ```
 ```
@@ -102,10 +102,10 @@ struct Id( u8 );
 
 impl AsRef< Id > for u8
 {
-    fn as_ref( &self ) -> &Id
-    {
-        unsafe { mem::transmute( self ) }
-    }
+  fn as_ref( &self ) -> &Id
+  {
+    unsafe { mem::transmute( self ) }
+  }
 }
 ```
 
@@ -121,7 +121,7 @@ That's exactly what [`ref-cast`] crate checks and does, without necessity of wri
 ```rust
 fn hello( name : &str ) 
 {
-    println!( "Hello, {}!", name );
+  println!( "Hello, {}!", name );
 }
 
 let m = Box::new( String::from( "Rust" ) );
@@ -153,9 +153,9 @@ For casting between types the [`as` keyword][`as`] is used in [Rust].
 ```rust
 fn average( values: &[ f64 ] ) -> f64
 {
-    let sum : f64 = sum( values );
-    let size : f64 = len( values ) as f64;
-    sum / size
+  let sum : f64 = sum( values );
+  let size : f64 = len( values ) as f64;
+  sum / size
 }
 ```
 

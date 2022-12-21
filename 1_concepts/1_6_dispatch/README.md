@@ -50,66 +50,82 @@ In situations where you need to deal with different types, but all possible type
 
 For example the following [dynamically dispatched][2] code:
 ```rust
-trait SayHello {
-    fn say_hello(&self);
+trait SayHello 
+{
+  fn say_hello( &self );
 }
 
 struct English;
-impl SayHello for English {
-    fn say_hello(&self) {
-        println!("Hello!")
-    }
+impl SayHello for English
+{
+  fn say_hello( &self )
+  {
+    println!( "Hello!" )
+  }
 }
 
 struct Spanish;
-impl SayHello for Spanish {
-    fn say_hello(&self) {
-        println!("Hola!")
-    }
+impl SayHello for Spanish 
+{
+  fn say_hello( &self )
+  {
+    println!( "Hola!" )
+  }
 }
 
 // We have to use trait object here to contain different types.
-let greetings: Vec<Box<dyn SayHello>> = vec![
-    Box::new(English),
-    Box::new(Spanish),
+let greetings : Vec< Box< dyn SayHello > > = vec!
+[
+  Box::new( English ),
+  Box::new( Spanish ),
 ];
 ```
 
 Can be refactored in the following way (as far as we know that only `English` and `Spanish` types will be used):
 ```rust
-trait SayHello {
-    fn say_hello(&self);
+trait SayHello 
+{
+  fn say_hello( &self );
 }
 
 struct English;
-impl SayHello for English {
-    fn say_hello(&self) {
-        println!("Hello!")
-    }
+impl SayHello for English
+{
+  fn say_hello( &self )
+  {
+    println!( "Hello!" )
+  }
 }
 
 struct Spanish;
-impl SayHello for Spanish {
-    fn say_hello(&self) {
-        println!("Hola!")
-    }
+impl SayHello for Spanish 
+{
+  fn say_hello( &self )
+  {
+    println!( "Hola!" )
+  }
 }
 
-enum Language {
-    English(English),
-    Spanish(Spanish),
+enum Language 
+{
+  English( English ),
+  Spanish( Spanish ),
 }
-impl SayHello for Language {
-    fn say_hello(&self) {
-        match self {
-            Language::English(l) => l.say_hello(),
-            Language::Spanish(l) => l.say_hello(),
-        }
+
+impl SayHello for Language
+{
+  fn say_hello( &self )
+  {
+    match self 
+    {
+      Language::English( l ) => l.say_hello(),
+      Language::Spanish( l ) => l.say_hello(),
     }
+  }
 }
 
 // We contain different types without using trait objects.
-let greetings: Vec<Language> = vec![English, Spanish];
+let greetings : Vec< Language > = vec![ English, Spanish ];
 ```
 
 There is also a handy [enum_dispatch] crate, which generates this boilerplate automatically in some cases. It has [illustrative benchmarks][15] about performance gains of using `enum` for dispatching.
@@ -123,19 +139,23 @@ There is also a handy [enum_dispatch] crate, which generates this boilerplate au
 
 The canonical solution of this problem is to factor out an inner method that contains all of the code minus the generic conversions, and leave the outer method as a shell. For example:
 ```rust
-pub fn this<I: Into<String>>(i: I) -> usize {
-    // do something really complicated with `i.into()`
-    // potentially spanning multiple pages of code
+pub fn this< I : Into< String > >( i : I ) -> usize
+{
+  // do something really complicated with `i.into()`
+  // potentially spanning multiple pages of code
 }
 ```
 becomes
 ```rust
-#[inline]
-pub fn this<I: Into<String>>(i: I) -> usize {
-    _this_inner(i.into())
+#[ inline ]
+pub fn this< I : Into< String > >( i : I ) -> usize
+{
+  _this_inner( i.into() )
 }
-fn _this_inner(i: String) -> usize {
-    // same code as above without the conversion
+
+fn _this_inner( i : String ) -> usize 
+{
+  // same code as above without the conversion
 }
 ```
 This ensures only the conversion gets monomorphized, leading to leaner code and compile-time performance wins.
@@ -150,16 +170,18 @@ There is a handy [momo] crate, which generates this boilerplate automatically in
 
 Given the following `Storage` abstraction and `User` entity:
 ```rust
-trait Storage<K, V> {
-    fn set(&mut self, key: K, val: V);
-    fn get(&self, key: &K) -> Option<&V>;
-    fn remove(&mut self, key: &K) -> Option<V>;
+trait Storage< K, V >
+{
+  fn set( &mut self, key : K, val : V );
+  fn get( &self, key : &K ) -> Option< &V >;
+  fn remove( &mut self, key : &K ) -> Option< V >;
 }
 
-struct User {
-    id: u64,
-    email: Cow<'static, str>,
-    activated: bool,
+struct User 
+{
+  id : u64,
+  email : Cow< 'static, str >,
+  activated : bool,
 }
 ```
 

@@ -22,23 +22,26 @@ The more important concept to understand for day-to-day routine is a `?Sized` tr
 
 A real-world example would be:
 ```rust
-trait CommandHandler<C: Command> {
-    type Context: ?Sized;
-    type Result;
+trait CommandHandler< C : Command >
+{
+  type Context : ?Sized;
+  type Result;
 
-    fn handle_command(&self, cmd: &C, ctx: &Self::Context) -> Self::Result;
+  fn handle_command( &self, cmd : &C, ctx : &Self::Context ) -> Self::Result;
 }
 ```
 which allows to use "unsized" types like [trait objects][3]
 ```rust
-impl CommandHandler<CreateUser> for User {
-    type Context = dyn UserRepository;
-    type Result = Result<(), UserError>;
+impl CommandHandler< CreateUser > for User
+{
+  type Context = dyn UserRepository;
+  type Result = Result< (), UserError >;
     
-    fn handle_command(&self, cmd: &C, ctx: &Self::Context) -> Self::Result {
-        // Here we operate with UserRepository
-        // via its trait object: &dyn UserRepository
-    }
+  fn handle_command( &self, cmd : &C, ctx : &Self::Context ) -> Self::Result
+  {
+    // Here we operate with UserRepository
+    // via its trait object: &dyn UserRepository
+  }
 }
 ```
 
@@ -47,9 +50,9 @@ impl CommandHandler<CreateUser> for User {
 
 ## Task
 
-Given the [`User` and `UserRepository` implementations from the previous task](../1_6_dispatch#task), write the actual code for `CommandHandler<CreateUser>` implementation described above.
+Given the [`User` and `UserRepository` implementations from the previous task](../1_6_dispatch#task), write the actual code for `CommandHandler< CreateUser >` implementation described above.
 
-Provide tests for `CommandHandler<CreateUser>` implementation where `dyn UserRepository` is mocked with another hand-written type for testing purposes.
+Provide tests for `CommandHandler< CreateUser >` implementation where `dyn UserRepository` is mocked with another hand-written type for testing purposes.
 
 
 

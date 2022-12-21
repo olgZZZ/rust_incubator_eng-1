@@ -19,19 +19,21 @@ Declarative macros represent the most primitive form of macros in [Rust]. They a
 
 They are called _declarative_, because macro implementation represents a declaration of code transforming rules (you're declaring how your code will be transformed):
 ```rust
-macro_rules! vec {
-    ( $( $x:expr ),* ) => {
-        {
-            let mut temp_vec = Vec::new();
-            $(
-                temp_vec.push($x);
-            )*
-            temp_vec
-        }
-    };
+macro_rules! vec 
+{
+  ( $( $x:expr ),* ) => 
+  {
+    {
+      let mut temp_vec = Vec::new();
+      $(
+        temp_vec.push($x);
+      )*
+      temp_vec
+    }
+  };
 }
 
-let v = vec![1, 2, 3];
+let v = vec![ 1, 2, 3 ];
 ```
 The good part about declarative macros is that they are [hygienic][11] (and so, have much better [IDE]s support).
 
@@ -56,9 +58,10 @@ There are three kinds of procedural macros in [Rust] at the moment:
 
 - [`proc_macro` function-like macros][27], which usage looks like regular declarative macros usage, but they accept arbitrary tokens on input (while declarative ones don't), and are more powerful in general (can contain complex logic for generating simple code):
     ```rust
-    #[proc_macro]
-    pub fn make_answer(_: TokenStream) -> TokenStream {
-        "fn answer() -> u32 { 42 }".parse().unwrap()
+    #[ proc_macro ]
+    pub fn make_answer( _ : TokenStream ) -> TokenStream 
+    {
+      "fn answer() -> u32 { 42 }".parse().unwrap()
     }
     ```
     ```rust
@@ -67,25 +70,27 @@ There are three kinds of procedural macros in [Rust] at the moment:
 
 - [`proc_macro_attribute` attribute macros][28], which allow to create custom [Rust attributes][25]:
     ```rust
-    #[proc_macro_attribute]
-    pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
-       // code...
+    #[ proc_macro_attribute ]
+    pub fn route( attr : TokenStream, item : TokenStream ) -> TokenStream 
+    {
+      // code...
     }
     ```
     ```rust
-    #[route(GET, "/")]
+    #[ route( GET, "/" ) ]
     fn index() {}
     ```
 
 - [`proc_macro_derive` derive macros][29], which allow to provide custom implementations for `#[derive(Trait)]` attribute:
     ```rust
-    #[proc_macro_derive(AnswerFn)]
-    pub fn derive_answer_fn(_: TokenStream) -> TokenStream {
-        "impl Struct{ fn answer() -> u32 { 42 } }".parse().unwrap()
+    #[ proc_macro_derive( AnswerFn ) ]
+    pub fn derive_answer_fn( _ : TokenStream ) -> TokenStream 
+    {
+      "impl Struct{ fn answer() -> u32 { 42 } }".parse().unwrap()
     }
     ```
     ```rust
-    #[derive(AnswerFn)]
+    #[ derive( AnswerFn ) ]
     struct Struct;
     ```
     Idiomatically, `proc_macro_derive` should be used for _deriving trait implementations only_. For arbitrary functions generation it's better to go with `proc_macro_attribute`.

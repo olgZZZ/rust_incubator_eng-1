@@ -22,20 +22,23 @@ If you need additional features (like look around and backreferences), consider 
 
 Important to know, that in [Rust] __regular expression needs to be compiled before we can use it__. The compilation is not cheap. So, the following code introduces a performance problem:
 ```rust
-fn is_email(email: &str) -> bool {
-    let re = Regex::new(".+@.+").unwrap();  // compiles every time the function is called
-    re.is_match(email)
+fn is_email( email : &str ) -> bool 
+{
+  let re = Regex::new( ".+@.+" ).unwrap();  // compiles every time the function is called
+  re.is_match( email )
 }
 ```
 
 To omit unnecessary performance penalty we should __compile regular expression once and reuse its compilation result__. This is easily achieved by using the [`once_cell`] crate both in global and/or local scopes:
 ```rust
-static REGEX_EMAIL: Regex = once_cell::sync::Lazy::new(|| {
-    Regex::new(".+@.+").unwrap()
+static REGEX_EMAIL : Regex = once_cell::sync::Lazy::new( || 
+{
+  Regex::new( ".+@.+" ).unwrap()
 }); // compiles once on the first use
 
-fn is_email(email: &str) -> bool {
-    REGEX_EMAIL.is_match(email)
+fn is_email( email : &str ) -> bool 
+{
+  REGEX_EMAIL.is_match( email )
 }
 ```
 

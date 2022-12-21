@@ -16,52 +16,60 @@ The common and obvious rules in [Rust] when choosing type for an input parameter
 Let's illustrate it with the following trivial examples:
 ```rust
 // Read-only access is enough here.
-pub fn just_print_stringy(v: &str) {
-    println!("{}", v)
+pub fn just_print_stringy( v : &str ) 
+{
+  println!( "{}", v )
 }
 
 // We want to change `v`, but don't own.
-pub fn add_hi(v: &mut String) {
-    v.push_str(" Hi")
+pub fn add_hi( v : &mut String ) 
+{
+  v.push_str(" Hi")
 }
 
-#[derive(AsMut, AsRef)]
-pub struct Nickname(String);
-impl Nickname {
-    // We want to own `nickname` inside `Nickname` value. 
-    pub fn new(nickname: String) -> Self {
-        Self(nickname)
-    }
+#[ derive( AsMut, AsRef ) ]
+pub struct Nickname( String );
+impl Nickname 
+{
+  // We want to own `nickname` inside `Nickname` value. 
+  pub fn new( nickname : String ) -> Self 
+  {
+    Self(nickname)
+  }
 }
 ```
 However, due to the need of explicit type conversions in [Rust], such API can lack ergonomics in use (notice the explicit conversion methods that API user has to use):
 ```rust
-let mut nickname = Nickname::new("Vasya".to_string());
-add_hi(nickname.as_mut());
-just_print_stringy(nickname.as_ref());
+let mut nickname = Nickname::new( "Vasya".to_string() );
+add_hi( nickname.as_mut() );
+just_print_stringy( nickname.as_ref() );
 ```
 
 The most standard way to improve ergonomics here is to __hide type conversions under-the-hood by abstracting over input types__ in our APIs:
 ```rust
-pub fn just_print_stringy<S: AsRef<str>>(v: S) {
-    println!("{}", v.as_ref())
+pub fn just_print_stringy< S : AsRef< str > >( v : S ) 
+{
+  println!( "{}", v.as_ref() )
 }
 
-pub fn add_hi<S: AsMut<String>>(v: S) {
-    v.as_mut().push_str(" Hi")
+pub fn add_hi< S : AsMut< String > >( v : S ) 
+{
+  v.as_mut().push_str( " Hi" )
 }
 
-impl Nickname { 
-    pub fn new<S: Into<String>>(nickname: S) -> Self {
-        Self(nickname.into())
-    }
+impl Nickname 
+{ 
+  pub fn new< S : Into< String > >( nickname : S ) -> Self 
+  {
+    Self( nickname.into() )
+  }
 }
 ```
 And now our API is pleasant to use:
 ```rust
-let mut nickname = Nickname::new("Vasya");
-add_hi(&mut nickname);
-just_print_stringy(&nickname);
+let mut nickname = Nickname::new( "Vasya" );
+add_hi( &mut nickname );
+just_print_stringy( &nickname );
 ```
 
 This is one of the key features, which drive [Rust] expressiveness and ergonomics. Just look over `std` library to see how widely it's used: [`Iterator::eq()`][1], [`Vec::drain()`][2], [`HashMap::extend()`][3], etc.

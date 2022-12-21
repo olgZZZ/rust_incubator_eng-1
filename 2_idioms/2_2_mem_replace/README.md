@@ -5,22 +5,25 @@ __Estimated time__: 1 day
 
 As [Rust] implies [move semantics][1] by default and quite strict [borrowing rules][2], often, there are situations (especially, with large `struct`s and `enum`s) where mutating value in-place or values swapping may not be allowed by borrow checker, which is quite confusing and leads to doing needless clones (so providing redudant performance costs). For example:
 ```rust
-impl<T> Buffer<T> {
-    fn get_and_reset(&mut self) -> Vec<T> {
-        // error: cannot move out of dereference of `&mut`-pointer
-        let buf = self.buf;
-        self.buf = Vec::new();
-        buf
-    }
+impl< T > Buffer< T > 
+{
+  fn get_and_reset(&mut self) -> Vec<T> {
+    // error: cannot move out of dereference of `&mut`-pointer
+    let buf = self.buf;
+    self.buf = Vec::new();
+    buf
+  }
 }
 ```
 
 A neat and need-to-know trick in such situations is to use [`mem::replace`] (or [`mem::swap`]). It allows to swap two values of the same type without moving things around, partial destructuring and references mess. So, the example above is simply turns into:
 ```rust
-impl<T> Buffer<T> {
-    fn get_and_reset(&mut self) -> Vec<T> {
-        mem::replace(&mut self.buf, Vec::new())
-    }
+impl< T > Buffer< T > 
+{
+  fn get_and_reset( &mut self ) -> Vec< T >
+  {
+    mem::replace( &mut self.buf, Vec::new() )
+  }
 }
 ```
 
@@ -45,19 +48,21 @@ This situation has detailed explanation in the following article:
 > `mem::replace` lets us swap out the value, replacing it with something else. In this case, we put in an empty `String`, which does not need to allocate. As a result, we get the original `name` _as an owned value_. We can then wrap this in another enum.
 
 ```rust
-enum MyEnum {
-    A { name: String },
-    B { name: String },
+enum MyEnum 
+{
+  A { name: String },
+  B { name: String },
 }
 
-fn swizzle(e: &mut MyEnum) {
-    use self::MyEnum::*;
-    *e = match *e {
-        // Ownership rules do not allow taking `name` by value, but we cannot
-        // take the value out of a mutable reference, unless we replace it:
-        A { ref mut name } => B { name: mem::replace(name, String::new()) },
-        B { ref mut name } => A { name: mem::replace(name, String::new()) },
-    }
+fn swizzle(e: &mut MyEnum) 
+{
+  use self::MyEnum::*;
+  *e = match *e {
+    // Ownership rules do not allow taking `name` by value, but we cannot
+    // take the value out of a mutable reference, unless we replace it:
+    A { ref mut name } => B { name: mem::replace( name, String::new() ) },
+    B { ref mut name } => A { name: mem::replace( name, String::new() ) },
+  }
 }
 ```
 
@@ -70,21 +75,26 @@ fn swizzle(e: &mut MyEnum) {
 
 Consider the following situation:
 ```rust
-struct Names {
-    exclusions: Vec<String>,
-    names: HashSet<String>,
+struct Names 
+{
+  exclusions: Vec< String >,
+  names: HashSet< String >,
 }
 
-impl Names {
-    fn apply_exclusions(&mut self) {
-        self.exclusions.drain(..).for_each(|name| {
-            self.remove_name(&name);
-        })
-    }
+impl Names 
+{
+  fn apply_exclusions( &mut self ) 
+  {
+    self.exclusions.drain( .. ).for_each( | name | 
+    {
+      self.remove_name( &name );
+    })
+  }
     
-    fn remove_name(&mut self, name: &str) {
-        self.names.remove(name);
-    }
+  fn remove_name( &mut self, name : &str ) 
+  {
+    self.names.remove( name );
+  }
 }
 ```
 which does not compile due to 2 mutable borrows:
@@ -103,33 +113,41 @@ error[E0500]: closure requires unique access to `*self` but it is already borrow
 
 Using [`mem::take`] here allows us to avoid the problem with 2 mutable borrows at almost no cost (`Vec::defaukt()` is no-op), by swapping out the value in a temporary variable:
 ```rust
-impl Names {
-    fn apply_exclusions(&mut self) {
-        let mut exclusions = mem::take(&mut self.exclusions);
-        exclusions.drain(..).for_each(|name| {
-            self.remove_name(&name);
-        });
-    }
+impl Names 
+{
+  fn apply_exclusions( &mut self ) 
+  {
+    let mut exclusions = mem::take( &mut self.exclusions );
+    exclusions.drain( .. ).for_each( | name |
+    {
+      self.remove_name( &name );
+    });
+}
 
-    fn remove_name(&mut self, name: &str) {
-        self.names.remove(name);
-    }
+  fn remove_name( &mut self, name : &str )
+  {
+    self.names.remove( name );
+  }
 }
 ```
 
 It's worth mentioning, that this problem became much less common after [disjoint capture in closures had been introduced in 2021 Rust edition][5]. For illustration, the `self.name` mutation is intentionally separated into its own method, so we can lock the whole `&mut self`. If we simplify the code straightforwardly, it just compiles fine, due to mutable borrows are disjoint: 
 ```rust
-struct Names {
-    exclusions: Vec<String>,
-    names: HashSet<String>,
+struct Names 
+{
+  exclusions : Vec< String >,
+  names : HashSet< String >,
 }
 
-impl Names {
-    fn apply_exclusions(&mut self) {
-        self.exclusions.drain(..).for_each(|name| {
-            self.names.remove(&name);
-        })
-    }
+impl Names 
+{
+  fn apply_exclusions( &mut self )
+  {
+    self.exclusions.drain( .. ).for_each( | name | 
+    {
+      self.names.remove( &name );
+    })
+  }
 }
 ```
 

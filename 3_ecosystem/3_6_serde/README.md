@@ -13,22 +13,24 @@ __Estimated time__: 1 day
 The sweet part is that [`serde`] __does not rely on a runtime reflection__ mechanism and uses trait implementation for each type, so __eliminates most runtime costs__ and in most cases __makes serialization as performant as handwritten serializer for a particular case__, yet __remains ergonomic due to [automatic code deriving][1]__.
 
 ```rust
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-#[derive(Debug, Deserialize, Serialize)]
-struct Point {
-    x: i32,
-    y: i32,
+#[ derive( Debug, Deserialize, Serialize ) ]
+struct Point 
+{
+  x : i32,
+  y : i32,
 }
 
-fn main() {
-    let point = Point { x: 1, y: 2 };
+fn main() 
+{
+  let point = Point { x : 1, y : 2 };
 
-    let serialized = serde_json::to_string(&point).unwrap();
-    println!("serialized = {}", serialized);
+  let serialized = serde_json::to_string( &point ).unwrap();
+  println!( "serialized = {}", serialized );
 
-    let deserialized: Point = serde_json::from_str(&serialized).unwrap();
-    println!("deserialized = {:?}", deserialized);
+  let deserialized : Point = serde_json::from_str( &serialized ).unwrap();
+  println!( "deserialized = {:?}", deserialized );
 }
 ```
 

@@ -14,29 +14,29 @@ The key piece is to put a value behind a smart pointer, so the pointer itself ca
 
 The code below won't compile as `a` is owned by `x` and moved to a heap before is passed to `y`:
 ```rust
-struct Val(u8);
+struct Val( u8 );
 
-let a = Val(5);
-let x = Box::new(a);
-let y = Box::new(a);
+let a = Val( 5 );
+let x = Box::new( a );
+let y = Box::new( a );
 ```
 ```rust
 error[E0382]: use of moved value: `a`
  --> src/main.rs:6:22
   |
-5 |     let x = Box::new(a);
-  |                      - value moved here
-6 |     let y = Box::new(a);
-  |                      ^ value used here after move
+5 |     let x = Box::new( a );
+  |                       - value moved here
+6 |     let y = Box::new( a );
+  |                       ^ value used here after move
   |
   = note: move occurs because `a` has type `Val`, which does not implement the `Copy` trait
 ```
 
 However, [`Rc`] allows that:
 ```rust
-let a = Rc::new(Val(5));
-let x = Rc::clone(&a);  // does not clone original value,
-let y = Rc::clone(&a);  // but rather produces new reference to it
+let a = Rc::new( Val( 5 ) );
+let x = Rc::clone( &a );  // does not clone original value,
+let y = Rc::clone( &a );  // but rather produces new reference to it
 ```
 
 The [`Rc`], however, __should be used wisely__ as __won't deallocate memory on references cycle__ which is exactly what a __memory leak__ is. [Rust] is unable to prevent memory leaks at compile time (though makes hard to produce them). If it's still required to have a references cycle, you should use a [`Weak`] smart pointer ("weak reference") in combination with [`Rc`]. [`Weak`] allows to break a references cycle as can refer to a value that has been dropped already (returns `None` in such case). 
@@ -71,7 +71,7 @@ For better understanding [`Cell`]/[`RefCell`] purpose, design, limitations and u
 
 ## Shared mutability
 
-The most spread case is a combination of two previous: `Rc<RefCell<T>>` (or `Arc<Mutex<T>>`). This allows to mutate a value by multiple owners.
+The most spread case is a combination of two previous: `Rc< RefCell< T > >` (or `Arc< Mutex< T > >`). This allows to mutate a value by multiple owners.
 
 A real-world example would be a database client object: it _must be mutable_, as mutates its state under-the-hood (opens network connections, manages database sessions, etc), yet _we need to own it in multiple places_ of our code, not a single one.
 
@@ -90,7 +90,7 @@ There is a simple rule for omitting deadlocks with [`Mutex`]/[`RwLock`] (applica
 
 The following example explains why deadlocks happen:
 ```rust
-let owner1 = Arc::new(Mutex::new("string"));
+let owner1 = Arc::new( Mutex::new( "string" ) );
 let owner2 = owner1.clone();
 
 let value = owner1.lock.unwrap();
@@ -101,31 +101,33 @@ let value = owner2.lock.unwrap();
 
 Let's remove the intersection:
 ```rust
-let owner1 = Arc::new(Mutex::new("string"));
+let owner1 = Arc::new( Mutex::new( "string" ) );
 let owner2 = owner1.clone();
 {
-    let value = owner1.lock.unwrap();
-    // No intersection as owner1 locking scope ends here.
+  let value = owner1.lock.unwrap();
+  // No intersection as owner1 locking scope ends here.
 }
 {
-    let value = owner2.lock.unwrap();
+  let value = owner2.lock.unwrap();
 }
 ```
 
-That's why, usually, you should __omit to expose `Rc<RefCell<T>>`__ (or `Arc<Mutex<T>>`) __in API__'s, but rather __make them an inner implementation detail__. Doing this way you have full control over all locking scopes inside your methods (no scope can expand to outside), so __ensure that no intersection will happen__, and __expose a totally safe API__.
+That's why, usually, you should __omit to expose `Rc< RefCell< T > >`__ (or `Arc< Mutex< T > >`) __in API__'s, but rather __make them an inner implementation detail__. Doing this way you have full control over all locking scopes inside your methods (no scope can expand to outside), so __ensure that no intersection will happen__, and __expose a totally safe API__.
 
 ```rust
-#[derive(Clone)]
-struct SharedString(Arc<Mutex<String>>);
+#[ derive( Clone ) ]
+struct SharedString( Arc< Mutex< String > > );
 
-impl SharedString {
-    fn mutate_somehow(&self) {
-        let mut val = self.lock.unwrap();
-        *val = "another string"
-    }
+impl SharedString 
+{
+  fn mutate_somehow( &self ) 
+  {
+    let mut val = self.lock.unwrap();
+    *val = "another string"
+  }
 }
 
-let owner1 = SharedString(Arc::new(Mutex::new("string")));
+let owner1 = SharedString( Arc::new( Mutex::new( "string" ) ) );
 let owner2 = owner1.clone();
 
 // We are mutating the same value here,
@@ -141,8 +143,8 @@ owner2.mutate_somehow();
 
 ## Task
 
-Write a `GlobalStack<T>` collection which represents a trivial unsized [stack] (may grow infinitely) and has the following semantics:
-- can be mutated through multiple shared references (`&GlobalStack<T>`);
+Write a `GlobalStack< T >` collection which represents a trivial unsized [stack] (may grow infinitely) and has the following semantics:
+- can be mutated through multiple shared references (`&GlobalStack< T >`);
 - cloning doesn't clone data, but only produces a pointer, so multiple owners mutate the same data.
 
 

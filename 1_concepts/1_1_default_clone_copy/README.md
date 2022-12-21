@@ -14,28 +14,30 @@ It can be auto-derived, but only for a `struct` whose all members have [`Default
 
 If you're not enough with [std] deriving capabilities for [`Default`], consider to use [smart-default] crate. An example is quite self-explanatory:
 ```rust
-#[derive(SmartDefault)]
-enum Foo {
-    Bar,
-    #[default]
-    Baz {
-        #[default = 12]
-        a: i32,
-        b: i32,
-        #[default(Some(Default::default()))]
-        c: Option<i32>,
-        #[default(_code = "vec![1, 2, 3]")]
-        d: Vec<u32>,
-        #[default = "four"]
-        e: String,
-    },
-    Qux(i32),
+#[ derive ( SmartDefault ) ]
+enum Foo 
+{
+  Bar,
+  #[ default ]
+  Baz 
+  {
+    #[ default = 12 ]
+    a : i32,
+    b : i32,
+    #[ default( Some( Default::default() ) ) ]
+    c : Option< i32 >,
+    #[ default( _code = "vec![ 1, 2, 3 ]" ) ]
+    d : Vec< u32 >,
+    #[ default = "four" ]
+    e : String,
+  },
+    Qux( i32 ),
 }
 ```
 
 A great thing that having a [`Default`] implementation you can instantiate your `struct` with only the non-default values and have all other fields filled with default values:
 ```rust
-let x = Foo { bar: baz, ..Default::default() };
+let x = Foo { bar : baz, ..Default::default() };
 ```
 
 

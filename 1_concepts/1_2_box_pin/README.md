@@ -48,15 +48,18 @@ For better understanding [`Pin`] purpose, design, limitations and use cases read
 
 Given the following traits:
 ```rust
-trait MutMeSomehow {
-    fn mut_me_somehow(self: Pin<&mut Self>);
+trait MutMeSomehow 
+{
+  fn mut_me_somehow( self : Pin< &mut Self > );
 }
 ```
 ```rust
-trait SayHi: fmt::Debug {
-    fn say_hi(self: Pin<&Self>) {
-        println!("Hi from {:?}", self)
-    }
+trait SayHi : fmt::Debug
+{
+  fn say_hi( self : Pin< &Self > )
+  {
+    println!( "Hi from {:?}", self )
+  }
 }
 ```
 

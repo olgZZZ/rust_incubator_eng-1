@@ -17,14 +17,16 @@ In a nutshell:
 ```rust
 use std::borrow::Cow;
 
-fn describe(error: &Error) -> Cow<'static, str> {
-    match *error {
-        // Returning &'str - a borrowed reference to static str.
-        Error::NotFound => "Error: Not found".into(),
-        
-        // Returning String - an owned String allocated in heap.
-        Error::Custom(e) => format!("Error: {}", e).into(),
-    }
+fn describe( error : &Error ) -> Cow< 'static, str > 
+{
+  match *error 
+  {
+    // Returning &'str - a borrowed reference to static str.
+    Error::NotFound => "Error: Not found".into(),
+       
+    // Returning String - an owned String allocated in heap.
+    Error::Custom(e) => format!( "Error: {}", e ).into(),
+  }
 }
 ```
 
