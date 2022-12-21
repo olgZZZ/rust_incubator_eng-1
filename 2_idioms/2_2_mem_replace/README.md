@@ -54,10 +54,11 @@ enum MyEnum
   B { name: String },
 }
 
-fn swizzle(e: &mut MyEnum) 
+fn swizzle( e : &mut MyEnum ) 
 {
   use self::MyEnum::*;
-  *e = match *e {
+  *e = match *e 
+  {
     // Ownership rules do not allow taking `name` by value, but we cannot
     // take the value out of a mutable reference, unless we replace it:
     A { ref mut name } => B { name: mem::replace( name, String::new() ) },

@@ -34,8 +34,8 @@ mod tests
   {
     let h = hash( "some_string" );
         
-    assert_eq!(h.len(), 64);
-    assert!(!h.contains("z"));
+    assert_eq!( h.len(), 64 );
+    assert!( !h.contains( "z" ) );
   }
 }
 ```

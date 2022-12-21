@@ -278,8 +278,8 @@ struct Receiver< T > { ... }
 impl< T > Sender< T > 
 {
   fn try_send( &self, value : T ) -> Result< (), TrySendError< T > >;
-    fn send( &self, value : T ) -> Result< (), SendError< T > >;
-    fn send_timeout( &self, value : T, dur : Duration ) -> Result< (), SendTimeoutError< T > >;
+  fn send( &self, value : T ) -> Result< (), SendError< T > >;
+  fn send_timeout( &self, value : T, dur : Duration ) -> Result< (), SendTimeoutError< T > >;
 }
 
 impl< T > Receiver< T > 

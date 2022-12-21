@@ -24,7 +24,7 @@ pub fn just_print_stringy( v : &str )
 // We want to change `v`, but don't own.
 pub fn add_hi( v : &mut String ) 
 {
-  v.push_str(" Hi")
+  v.push_str( " Hi" )
 }
 
 #[ derive( AsMut, AsRef ) ]
@@ -34,7 +34,7 @@ impl Nickname
   // We want to own `nickname` inside `Nickname` value. 
   pub fn new( nickname : String ) -> Self 
   {
-    Self(nickname)
+    Self( nickname )
   }
 }
 ```

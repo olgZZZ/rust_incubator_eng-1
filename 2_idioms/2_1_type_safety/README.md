@@ -23,7 +23,7 @@ struct Post
   body: String,
 }
 
-fn repost(post: &Post, new_author_id: u64) -> Post 
+fn repost(post : &Post, new_author_id : u64) -> Post 
 {
   let mut new_post = post.clone();
   new_post.id = new_author_id;  // Oops!
